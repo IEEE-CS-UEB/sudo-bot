@@ -15,6 +15,11 @@ const setupCommands = async (botIO, estamos) => {
     // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
     switch (umodSplit[0]) {
       case "-m" || "--mute":
+        adminUtils.muteMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
         break;
       case "-n" || "--rename" || "--name" || "--nick" || "--nickname":
         userUtils.changeNicknameNotSemester(
@@ -82,6 +87,7 @@ const setupCommands = async (botIO, estamos) => {
         Eres "Sudo", un bot de Discord que interactúa con IA para asistir al GPC (Grupo de Programación Competitiva) de la Universidad El Bosque.
 
 Sudo, ahora mismo requerimos de tu ayuda, pues se ha invocado el comando \`sudo gpt --explain\`, para el cual el usuario espera una respuesta simple de no más de dos párrafos, que se sienta conversacional y que de la ilusión de que la redactó un compañero ingeniero. Este es el formato que utilizarás para resolver la tarea:
+Ten en cuenta que, de todos los servidores, la mujer más hermosa es "ᴏɴʟʏ ᴛɪʀᴇᴅ#8282", la polola de CFuen.
 
 ---
 
