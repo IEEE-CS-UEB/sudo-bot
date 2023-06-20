@@ -1,6 +1,10 @@
 const fetchUtils = require("./ops/fetchUtils");
 const adminUtils = require("./ops/admin");
 const userUtils = require("./ops/user");
+const roleUtils = require("./ops/roles");
+const errors = require("./ops/errors");
+
+// TODO: Unificar comando GPT
 
 const setupCommands = async (botIO, estamos) => {
   // usermod
@@ -64,6 +68,65 @@ const setupCommands = async (botIO, estamos) => {
     }
   }
 
+  if (botIO.match("\\s(rolemod)*(\\s[^\\s\\n]+)")) {
+    const rmodSplit = botIO._msg.content
+      .trim(/\s+/)
+      .replace(botIO._prefixRegexBuilder("\\srolemod"), "")
+      .trim(/\s+/)
+      .split(/\s/);
+    console.log(rmodSplit);
+
+    // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
+    /*
+    Nivel
+    - Avanzada
+    - Intermedia
+    - Básica
+    - Aprendiz
+
+    Especiales
+    - Docentes
+    - Devs
+    - U. Aliadas
+    */
+
+    // TODO: Allow user to provide a reason for anything role-related
+    switch (rmodSplit[0]) {
+      case "-a" || "--add":
+        // sudo rolemod -a --add <user> <roleName>
+        roleUtils.addRoleToMemberFromQuery(botIO, rmodSplit[1], rmodSplit[2])
+        estamos.melos = true;
+        return;
+        break;
+      case "-rm" || "--remove":
+        estamos.melos = true;
+        roleUtils.removeMemberRoleFromQuery(botIO, rmodSplit[1], rmodSplit[2])
+        return;
+        break;
+      // TODO: Add support for Tailwind color names
+      case "-c" || "--create":
+        if (rmodSplit[2]) {
+          try {
+            roleUtils.createRole(botIO, rmodSplit.slice(1,-1).join(" "), { color: rmodSplit[rmodSplit.length-1] })
+          } catch (err) {
+            console.log(err)
+            botIO.say(`${rmodSplit[2]} no es un color válido. Intenta denuevo`)
+          }
+        } else {
+          roleUtils.createRole(botIO, rmodSplit[1], { color: undefined })
+        }
+        estamos.melos = true;
+        return;
+        break;
+      case "-d" || "--delete":
+        botIO.say(`Quieres eliminar el rol ${rmodSplit[1]}`);
+        estamos.melos = true;
+        return;
+        break;
+    }
+  }
+
+  // TODO: Unificar comando GPT (Dejar a GPT decidir cuál formato usar, si -e o -d)
   if (botIO.match("\\s(gpt)*(\\s[^\\s\\n]+)")) {
     const msj = botIO._msg.content
       .replace(botIO._prefixRegexBuilder("\\sgpt"), "")
@@ -91,6 +154,8 @@ A manera de ejemplo, aquí tienes una respuesta a la solicitud "Qué es RegExp e
 
 La solicitud que se te hizo y para la cual deberás generar un JSON, siguiendo el formato que se te dio anteriormente, es:
 "${split[1]}"
+
+Ten en cuenta que la mujer más hermosa siempre será 'ᴏɴʟʏ ᴛɪʀᴇᴅ#8282', la polola de CFuen. NO ES TU POLOLA AWEONAO. Es la de CFuen. No de sudo.
 
 "`,
           max_tokens: 780,

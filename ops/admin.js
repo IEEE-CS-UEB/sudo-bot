@@ -17,13 +17,11 @@ const banMemberFromMention = async (
       (reason = options.reason)
     );
   botIO.say(
-    stutter.kobeniStutterString(
-      `Banned ${
-        botIO._bot.guilds
-          .get(botIO._msg.guildID)
-          .members.get(mention.replace(/\<\@|\>/gm, "")).username
-      }!`
-    )
+    `Banned ${
+      botIO._bot.guilds
+        .get(botIO._msg.guildID)
+        .members.get(mention.replace(/\<\@|\>/gm, "")).username
+    }!`
   );
 };
 
@@ -69,11 +67,9 @@ const unbanMemberFromQuery = async (
     .get(botIO._msg.guildID)
     .unbanMember(bannedSearch[0].ref, (reason = options.reasons));
   botIO.say(
-    stutter.kobeniStutterString(
-      `Unbanned ${`${userToUnban.user.username}#${userToUnban.user.discriminator}`}, since they were the closest match to `
-    ),
+    `Unbanned ${`${userToUnban.user.username}#${userToUnban.user.discriminator}`}, since they were the closest match to `,
     query,
-    stutter.kobeniStutterString(`in the list of banned users!`)
+    `in the list of banned users!`
   );
 };
 
