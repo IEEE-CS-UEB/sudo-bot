@@ -11,13 +11,15 @@ const setupCommands = async (botIO, estamos) => {
       .trim(/\s+/)
       .split(/\s/);
     console.log(umodSplit);
-
+    
     // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
     switch (umodSplit[0]) {
+      //se debe poner #! para mencionar el canal
       case "-m" || "--mute":
         adminUtils.muteMemberFromMention(
           botIO,
           umodSplit[1].replace(/\<\@|\>/gm, ""),
+          umodSplit[2].replace(/\<\#|\>/gm, ""),
           { deleteMessageDays: 0, reason: 'por ni mierda' }
         );
         break;
@@ -29,6 +31,7 @@ const setupCommands = async (botIO, estamos) => {
         );
         break;
       case "-um" || "--unmute":
+        //adminUtils.unmuteMemberFromMention(botIO, umodSplit[1], (options = {}));
         break;
       case "-k" || "--kick":
         break;
