@@ -81,11 +81,47 @@ const unbanMemberFromQuery = async (
 const isolateMemberFromMention = (
   botIO,
   mention,
+  time,
   options = { deleteMessageDays: 0, reason: "No reason provided" }
 ) => {
-  const date=  new Date(Date.now() + 1 * 60 * 1000);
-  botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention,{communicationDisabledUntil: date});
-  //console.log(botIO._bot.guilds.get(botIO._msg.guildID));
+  try {
+    if(time>0||time.isNumeric){
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
+    console.log(user);
+    const date=  new Date(Date.now() + time * 60 * 1000);
+    botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention,{communicationDisabledUntil: date});
+    botIO.say(
+      `Usuario ${user} esta aislado`
+    );
+  }else{
+    botIO.say(
+      `El tiempo esta mal ingresado debe ser numerico y mayor a 0`
+    );
+  }
+  } catch (error) {
+    botIO.say(
+      `Error: no existe el usuario`
+    );
+  }
+  
+};
+const outIsolateMemberFromMention = (
+  botIO,
+  mention,
+  options = { deleteMessageDays: 0, reason: "No reason provided" }
+) => {
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
+    botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention,{communicationDisabledUntil: null});
+    botIO.say(
+      `Usuario ${user} salio de la estar aislado`
+    );
+  } catch (e) {
+    botIO.say(
+      `Error: el usuario no puede ser aislado o no existe el usuario`
+    );
+  }
+  
 };
 const muteMemberFromMention = (
   botIO,
@@ -103,9 +139,98 @@ const muteMemberVoiceFromMention = (
   mention,
   options = { deleteMessageDays: 0, reason: "No reason provided" }
 ) => {
-  //falta validaciones de user
-  const user = botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention, { mute: true });
-  console.log(user);
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
+    botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention, { mute: true });
+    botIO.say(
+      `Usuario ${user} muteado`
+    );
+  } catch (error) {
+    botIO.say(
+      `Error: no existe el usuario`
+    );
+  }
   
 };
-module.exports = { banMemberFromMention, unbanMemberFromQuery, muteMemberFromMention };
+const unmuteMemberVoiceFromMention = (
+  botIO,
+  mention,
+  options = { deleteMessageDays: 0, reason: "No reason provided" }
+) => {
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
+    botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention, { mute: false });
+    botIO.say(
+      `Usuario ${user} ya puede hablar`
+    );
+  } catch (error) {
+    botIO.say(
+      `Error: no existe el usuario`
+    );
+  }
+  
+};
+const unmuteMemberVoiceEvery = (
+  botIO,
+  options = { deleteMessageDays: 0, reason: "No reason provided" }
+) => {
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).voiceStates;
+    for (let [key, value] of user) {
+      botIO._bot.guilds.get(botIO._msg.guildID).editMember(key, { mute: false });
+    }
+    
+    botIO.say(
+      `Todo los usuarios puede hablar`
+    );
+  } catch (error) {
+    botIO.say(
+      `Error: intente mas tarde`
+    );
+  }
+  
+};
+const muteMemberVoiceEvery = (
+  botIO,
+  options = { deleteMessageDays: 0, reason: "No reason provided" }
+) => {
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).voiceStates;
+    for (let [key, value] of user) {
+      botIO._bot.guilds.get(botIO._msg.guildID).editMember(key, { mute: true });
+    }
+    botIO.say(
+      `Todo los usuarios estan muteados`
+    );
+  } catch (error) {
+    botIO.say(
+      `Error: intente mas tarde`
+    );
+  }
+  
+};
+const muteMemberVoiceEveryBut = (
+  botIO,
+  mention,
+  options = { deleteMessageDays: 0, reason: "No reason provided" }
+) => {
+  try {
+    const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
+    const users =botIO._bot.guilds.get(botIO._msg.guildID).voiceStates;
+    for (let [key, value] of users) {
+      console.log(key+"ds"+mention);
+      if(key!=mention){
+      botIO._bot.guilds.get(botIO._msg.guildID).editMember(key, { mute: true });
+    }
+    }
+    botIO.say(
+      `Todo los usuarios estan muteados, menos ${user} `
+    );
+  } catch (error) {
+    botIO.say(
+      `Error: intente mas tarde`
+    );
+  }
+  
+};
+module.exports = {outIsolateMemberFromMention,muteMemberVoiceEvery,muteMemberVoiceEveryBut, banMemberFromMention, unbanMemberFromQuery, muteMemberFromMention ,isolateMemberFromMention,muteMemberVoiceFromMention,unmuteMemberVoiceFromMention, unmuteMemberVoiceEvery};
