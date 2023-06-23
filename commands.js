@@ -17,35 +17,91 @@ const setupCommands = async (botIO, estamos) => {
     console.log(umodSplit);
 
     // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
-    switch (umodSplit[0]) {
-      case "-m" || "--mute":
-        break;
-      case "-n" || "--rename" || "--name" || "--nick" || "--nickname":
+    if( umodSplit[0] =="-m" || umodSplit[0] =="--mute"){
+        adminUtils.muteMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          umodSplit[2].replace(/\<\#|\>/gm, ""),
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }
+      else if(umodSplit[0] =="-n" || umodSplit[0] =="--rename" || umodSplit[0] =="--name" || umodSplit[0] =="--nick" || umodSplit[0] =="--nickname"){
         userUtils.changeNicknameNotSemester(
           botIO,
           umodSplit[1].replace(/\<\@|\>/gm, ""),
           umodSplit[2]
         );
-        break;
-      case "-um" || "--unmute":
-        break;
-      case "-k" || "--kick":
-        break;
-      case "-b" || "--ban":
+      }else if( umodSplit[0] =="-um" || umodSplit[0] =="--unmute") {
+        adminUtils.unmuteMemberFromMention(botIO, umodSplit[1], (options = {}));
+      }else if(umodSplit[0] == "-k" || umodSplit[0] =="--kick") {
+        
+      }else if(umodSplit[0] == "-b" || umodSplit[0] =="--ban") {
         adminUtils.banMemberFromMention(botIO, umodSplit[1], (options = {}));
-        break;
-      case "-ub":
-      case "--unban":
+        
+      }else if(umodSplit[0] == "-ub"|| umodSplit[0] =="--unban"){
         adminUtils.unbanMemberFromQuery(botIO, umodSplit[1], (options = {}));
-        break;
-      case "-h":
-      case "--help":
+      }else if(umodSplit[0] =="-h"|| umodSplit[0] =="--help"){
         console.log("pidieron ayuda :V");
-        break;
-    }
+      }
+      else if(umodSplit[0] =="-i"||umodSplit[0] =="--insolete"){
+        adminUtils.isolateMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          umodSplit[2],
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }else if(umodSplit[0] =="-oi"||umodSplit[0] =="--outinsolete"){
+        adminUtils.outIsolateMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }else if(umodSplit[0]=="-mv"||umodSplit[0]== "--mutevoice"){
+        if(umodSplit.length==2){
+          adminUtils.muteMemberVoiceFromMention(
+            botIO,
+            umodSplit[1].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else if(umodSplit.length==1){
+          adminUtils.muteMemberVoiceEvery(
+            botIO,
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+          //sudo usermod -mv -but @user
+        }else if(umodSplit.length==3 && umodSplit[1]=="-but"){
+          adminUtils.muteMemberVoiceEveryBut(
+            botIO,
+            umodSplit[2].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else{
+          botIO.say(
+            `Capa8_Error: No cumple con la estructura`
+          );
+        }
 
+      }else if(umodSplit[0]=="-umv" || umodSplit[0]=="--unmutevoice"){
+        if(umodSplit.length==2){
+          adminUtils.unmuteMemberVoiceFromMention(
+            botIO,
+            umodSplit[1].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else if(umodSplit.length==1){
+          adminUtils.unmuteMemberVoiceEvery(
+            botIO,
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else{
+          botIO.say(
+            `Capa8_Error: No cumple con la estructura`
+          );
+        }
+      }
     estamos.melos = true;
     return;
+    }
   }
 
   // grep
@@ -92,33 +148,39 @@ const setupCommands = async (botIO, estamos) => {
 
     // TODO: Allow user to provide a reason for anything role-related
     switch (rmodSplit[0]) {
-      case "-a" || "--add":
+      case "-a":
+      case "--add":
         // sudo rolemod -a --add <user> <roleName>
-        roleUtils.addRoleToMemberFromQuery(botIO, rmodSplit[1], rmodSplit[2])
+        roleUtils.addRoleToMemberFromQuery(botIO, rmodSplit[1], rmodSplit[2]);
         estamos.melos = true;
         return;
         break;
-      case "-rm" || "--remove":
+      case "-rm":
+      case "--remove":
         estamos.melos = true;
-        roleUtils.removeMemberRoleFromQuery(botIO, rmodSplit[1], rmodSplit[2])
+        roleUtils.removeMemberRoleFromQuery(botIO, rmodSplit[1], rmodSplit[2]);
         return;
         break;
       // TODO: Add support for Tailwind color names
-      case "-c" || "--create":
+      case "-c":
+      case "--create":
         if (rmodSplit[2]) {
           try {
-            roleUtils.createRole(botIO, rmodSplit.slice(1,-1).join(" "), { color: rmodSplit[rmodSplit.length-1] })
+            roleUtils.createRole(botIO, rmodSplit.slice(1, -1).join(" "), {
+              color: rmodSplit[rmodSplit.length - 1],
+            });
           } catch (err) {
-            console.log(err)
-            botIO.say(`${rmodSplit[2]} no es un color válido. Intenta denuevo`)
+            console.log(err);
+            botIO.say(`${rmodSplit[2]} no es un color válido. Intenta denuevo`);
           }
         } else {
-          roleUtils.createRole(botIO, rmodSplit[1], { color: undefined })
+          roleUtils.createRole(botIO, rmodSplit[1], { color: undefined });
         }
         estamos.melos = true;
         return;
         break;
-      case "-d" || "--delete":
+      case "-d":
+      case "--delete":
         botIO.say(`Quieres eliminar el rol ${rmodSplit[1]}`);
         estamos.melos = true;
         return;
