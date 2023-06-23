@@ -1,6 +1,10 @@
 const fetchUtils = require("./ops/fetchUtils");
 const adminUtils = require("./ops/admin");
 const userUtils = require("./ops/user");
+const roleUtils = require("./ops/roles");
+const errors = require("./ops/errors");
+
+// TODO: Unificar comando GPT
 
 const setupCommands = async (botIO, estamos) => {
   // usermod
@@ -13,35 +17,91 @@ const setupCommands = async (botIO, estamos) => {
     console.log(umodSplit);
 
     // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
-    switch (umodSplit[0]) {
-      case "-m" || "--mute":
-        break;
-      case "-n" || "--rename" || "--name" || "--nick" || "--nickname":
+    if( umodSplit[0] =="-m" || umodSplit[0] =="--mute"){
+        adminUtils.muteMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          umodSplit[2].replace(/\<\#|\>/gm, ""),
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }
+      else if(umodSplit[0] =="-n" || umodSplit[0] =="--rename" || umodSplit[0] =="--name" || umodSplit[0] =="--nick" || umodSplit[0] =="--nickname"){
         userUtils.changeNicknameNotSemester(
           botIO,
           umodSplit[1].replace(/\<\@|\>/gm, ""),
           umodSplit[2]
         );
-        break;
-      case "-um" || "--unmute":
-        break;
-      case "-k" || "--kick":
-        break;
-      case "-b" || "--ban":
+      }else if( umodSplit[0] =="-um" || umodSplit[0] =="--unmute") {
+        adminUtils.unmuteMemberFromMention(botIO, umodSplit[1], (options = {}));
+      }else if(umodSplit[0] == "-k" || umodSplit[0] =="--kick") {
+        
+      }else if(umodSplit[0] == "-b" || umodSplit[0] =="--ban") {
         adminUtils.banMemberFromMention(botIO, umodSplit[1], (options = {}));
-        break;
-      case "-ub":
-      case "--unban":
+        
+      }else if(umodSplit[0] == "-ub"|| umodSplit[0] =="--unban"){
         adminUtils.unbanMemberFromQuery(botIO, umodSplit[1], (options = {}));
-        break;
-      case "-h":
-      case "--help":
+      }else if(umodSplit[0] =="-h"|| umodSplit[0] =="--help"){
         console.log("pidieron ayuda :V");
-        break;
-    }
+      }
+      else if(umodSplit[0] =="-i"||umodSplit[0] =="--insolete"){
+        adminUtils.isolateMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          umodSplit[2],
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }else if(umodSplit[0] =="-oi"||umodSplit[0] =="--outinsolete"){
+        adminUtils.outIsolateMemberFromMention(
+          botIO,
+          umodSplit[1].replace(/\<\@|\>/gm, ""),
+          { deleteMessageDays: 0, reason: 'por ni mierda' }
+        );
+      }else if(umodSplit[0]=="-mv"||umodSplit[0]== "--mutevoice"){
+        if(umodSplit.length==2){
+          adminUtils.muteMemberVoiceFromMention(
+            botIO,
+            umodSplit[1].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else if(umodSplit.length==1){
+          adminUtils.muteMemberVoiceEvery(
+            botIO,
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+          //sudo usermod -mv -but @user
+        }else if(umodSplit.length==3 && umodSplit[1]=="-but"){
+          adminUtils.muteMemberVoiceEveryBut(
+            botIO,
+            umodSplit[2].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else{
+          botIO.say(
+            `Capa8_Error: No cumple con la estructura`
+          );
+        }
 
+      }else if(umodSplit[0]=="-umv" || umodSplit[0]=="--unmutevoice"){
+        if(umodSplit.length==2){
+          adminUtils.unmuteMemberVoiceFromMention(
+            botIO,
+            umodSplit[1].replace(/\<\@|\>/gm, ""),
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else if(umodSplit.length==1){
+          adminUtils.unmuteMemberVoiceEvery(
+            botIO,
+            { deleteMessageDays: 0, reason: 'por ni mierda' }
+          );
+        }else{
+          botIO.say(
+            `Capa8_Error: No cumple con la estructura`
+          );
+        }
+      }
     estamos.melos = true;
     return;
+    }
   }
 
   // grep
@@ -64,6 +124,71 @@ const setupCommands = async (botIO, estamos) => {
     }
   }
 
+  if (botIO.match("\\s(rolemod)*(\\s[^\\s\\n]+)")) {
+    const rmodSplit = botIO._msg.content
+      .trim(/\s+/)
+      .replace(botIO._prefixRegexBuilder("\\srolemod"), "")
+      .trim(/\s+/)
+      .split(/\s/);
+    console.log(rmodSplit);
+
+    // TODO: ponerle un trycatch a esto pq el bot se muere si no se pone @
+    /*
+    Nivel
+    - Avanzada
+    - Intermedia
+    - Básica
+    - Aprendiz
+
+    Especiales
+    - Docentes
+    - Devs
+    - U. Aliadas
+    */
+
+    // TODO: Allow user to provide a reason for anything role-related
+    switch (rmodSplit[0]) {
+      case "-a":
+      case "--add":
+        // sudo rolemod -a --add <user> <roleName>
+        roleUtils.addRoleToMemberFromQuery(botIO, rmodSplit[1], rmodSplit[2]);
+        estamos.melos = true;
+        return;
+        break;
+      case "-rm":
+      case "--remove":
+        estamos.melos = true;
+        roleUtils.removeMemberRoleFromQuery(botIO, rmodSplit[1], rmodSplit[2]);
+        return;
+        break;
+      // TODO: Add support for Tailwind color names
+      case "-c":
+      case "--create":
+        if (rmodSplit[2]) {
+          try {
+            roleUtils.createRole(botIO, rmodSplit.slice(1, -1).join(" "), {
+              color: rmodSplit[rmodSplit.length - 1],
+            });
+          } catch (err) {
+            console.log(err);
+            botIO.say(`${rmodSplit[2]} no es un color válido. Intenta denuevo`);
+          }
+        } else {
+          roleUtils.createRole(botIO, rmodSplit[1], { color: undefined });
+        }
+        estamos.melos = true;
+        return;
+        break;
+      case "-d":
+      case "--delete":
+        botIO.say(`Quieres eliminar el rol ${rmodSplit[1]}`);
+        estamos.melos = true;
+        return;
+        break;
+    }
+  }
+
+  // TODO: Unificar comando GPT (Dejar a GPT decidir cuál formato usar, si -e o -d)
   if (botIO.match("\\s(gpt)*(\\s[^\\s\\n]+)")) {
     const msj = botIO._msg.content
       .replace(botIO._prefixRegexBuilder("\\sgpt"), "")
@@ -91,6 +216,8 @@ A manera de ejemplo, aquí tienes una respuesta a la solicitud "Qué es RegExp e
 
 La solicitud que se te hizo y para la cual deberás generar un JSON, siguiendo el formato que se te dio anteriormente, es:
 "${split[1]}"
+
+Ten en cuenta que la mujer más hermosa siempre será 'ᴏɴʟʏ ᴛɪʀᴇᴅ#8282', la polola de CFuen. NO ES TU POLOLA AWEONAO. Es la de CFuen. No de sudo.
 
 "`,
           max_tokens: 780,

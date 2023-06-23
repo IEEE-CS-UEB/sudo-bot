@@ -17,6 +17,13 @@ class BotIOManager {
   _msg;
 
   /**
+   * El objeto que representa al guild (servidor) desde donde se invoca al bot
+   * @private
+   * @type {import("eris").Message}
+   */
+  _guildID;
+
+  /**
    * El objeto que representa el cliente de OpenAI
    * @private
    */
@@ -54,8 +61,12 @@ class BotIOManager {
    * Función que envía un mensaje al canal del usuario.
    * @param {...string} values - Los valores que se quieren incluir en el mensaje.
    */
-  say = (...values) =>
+  say = (...values) => {
     this._bot.createMessage(this._msg.channel.id, values.join(" "));
+    if (this._log) {
+      console.log(`🤖 sudo: ${values.join(" ")}`);
+    }
+  };
 
   /**
    * Una función que nos devuelve una RegExp para comparar que
@@ -74,11 +85,13 @@ class BotIOManager {
    * @returns {Array} - Un array de resultados que devuelve la función match().
    */
   match = (regexString) => {
-    const match = this._msg.content.match(this._prefixRegexBuilder(regexString));
+    const match = this._msg.content.match(
+      this._prefixRegexBuilder(regexString)
+    );
     if (this._log && match) {
-      console.log(this._prefixRegexBuilder(regexString));
+      console.log(`⚙️  Regex Match: ${this._prefixRegexBuilder(regexString)}`);
     }
-    return match
+    return match;
   };
 
   /**
