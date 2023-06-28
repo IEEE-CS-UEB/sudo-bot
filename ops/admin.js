@@ -87,8 +87,8 @@ const isolateMemberFromMention = (
   try {
     if(time>0||time.isNumeric){
     const user =botIO._bot.guilds.get(botIO._msg.guildID).members.get(mention).username;
-    console.log(user);
-    const date=  new Date(Date.now() + time * 60 * 1000);
+    const min = time * 60 * 1000;
+    const date=  new Date(Date.now() + min);
     botIO._bot.guilds.get(botIO._msg.guildID).editMember(mention,{communicationDisabledUntil: date});
     botIO.say(
       `Usuario ${user} esta aislado`
